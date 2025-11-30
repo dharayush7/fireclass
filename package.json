@@ -1,7 +1,7 @@
 {
-  "name": "@dharayush07/fireclass",
-  "version": "0.1.8",
-  "description": "",
+  "name": "@dharayush7/fireclass",
+  "version": "0.1.9",
+  "description": "A minimal, type-safe Firestore model helper** for Node.js with first-class integration** for class-validator and class-transformer.Provides base models, typed CRUD, declarative collection mapping, and strong query builders",
   "license": "MIT",
   "author": {
     "name": "Ayush Dhar",

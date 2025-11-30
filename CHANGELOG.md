@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to Keep a Changelog and Semantic Versioning.
 
-## v0.1.8 - 2025-11-30
+## v0.1.9 - 2025-11-30
 
 ### Added
 
