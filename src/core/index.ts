@@ -1,7 +1,9 @@
 import { Firestore, Query } from "firebase-admin/firestore";
 import { QueryOptions } from "../types";
+import { validateOrReject } from "class-validator";
+import { plainToInstance } from "class-transformer";
 
-export default function getBaseModel(firestore: Firestore) {
+export function getBaseModel(firestore: Firestore) {
   return class BaseModel<T> {
     collection!: string;
     id?: string;
@@ -19,6 +21,9 @@ export default function getBaseModel(firestore: Firestore) {
     }
 
     async save(): Promise<string> {
+      const instance = plainToInstance(this.constructor as any, this) as object;
+      await validateOrReject(instance);
+
       const data: any = {};
 
       for (const key of Object.keys(this)) {
