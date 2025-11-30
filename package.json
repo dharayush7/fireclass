@@ -1,0 +1,35 @@
+{
+  "name": "@dharayush07/fireclass",
+  "version": "0.0.1",
+  "description": "",
+  "license": "MIT",
+  "author": {
+    "name": "Ayush Dhar",
+    "email": "contact@ayushdhar.com",
+    "url": "https://github.com/dharayush07"
+  },
+  "exports": {
+    "./core": {
+      "import": "./dist/core/index.mjs",
+      "require": "./dist/core/index.js",
+      "types": "./dist/core/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.mjs",
+      "require": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./decorators": {
+      "import": "./dist/decorators/index.mjs",
+      "require": "./dist/decorators/index.js",
+      "types": "./dist/decorators/index.d.ts"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsup src/**/*.ts --format esm,cjs --dts"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
