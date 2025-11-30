@@ -39,5 +39,8 @@
     "@types/node": "^24.10.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.6.0"
   }
 }
