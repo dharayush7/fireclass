@@ -1,4 +1,4 @@
-import { Firestore } from "firebase-admin/firestore";
+import { Firestore, Query } from "firebase-admin/firestore";
 import { QueryOptions } from "../types";
 
 export default function getBaseModel(firestore: Firestore) {
@@ -39,6 +39,17 @@ export default function getBaseModel(firestore: Firestore) {
       return this.id;
     }
 
+    async delete(): Promise<string> {
+      if (!this.id) {
+        throw new Error("Cannot delete document without an ID");
+      }
+
+      const colRef = firestore.collection(this.collection);
+      await colRef.doc(this.id).delete();
+
+      return this.id;
+    }
+
     static async findById<M extends typeof BaseModel>(
       this: M,
       id: string
@@ -57,9 +68,8 @@ export default function getBaseModel(firestore: Firestore) {
       this: T,
       query: QueryOptions<InstanceType<T>>
     ): Promise<InstanceType<T>[]> {
-      let ref: FirebaseFirestore.Query = firestore.collection(this._collection);
+      let ref: Query = firestore.collection(this._collection);
 
-      // WHERE
       if (query.where) {
         for (const key in query.where) {
           const condition = query.where[key] as any;
@@ -82,13 +92,11 @@ export default function getBaseModel(firestore: Firestore) {
         }
       }
 
-      // ORDER BY
       if (query.orderBy) {
         const [field, dir] = Object.entries(query.orderBy)[0];
         ref = ref.orderBy(field, dir);
       }
 
-      // LIMIT
       if (query.limit) ref = ref.limit(query.limit);
 
       const snap = await ref.get();
@@ -96,6 +104,75 @@ export default function getBaseModel(firestore: Firestore) {
       return snap.docs.map(
         (d) => new this({ id: d.id, ...d.data() })
       ) as InstanceType<T>[];
+    }
+
+    static async deleteById<T extends typeof BaseModel>(
+      this: T,
+      id: string
+    ): Promise<InstanceType<T> | null> {
+      const col = firestore.collection(this._collection);
+      const docRef = col.doc(id);
+
+      const doc = await docRef.get();
+      if (!doc.exists) return null;
+
+      await docRef.delete();
+      const data = doc.data() || {};
+      const instance = new this({ ...data, id }) as InstanceType<T>;
+      return instance;
+    }
+
+    static async deleteMany<T extends typeof BaseModel>(
+      this: T,
+      query: QueryOptions<InstanceType<T>>
+    ): Promise<InstanceType<T>[]> {
+      let ref: FirebaseFirestore.Query = firestore.collection(this._collection);
+
+      if (query.where) {
+        for (const key in query.where) {
+          const condition = query.where[key] as any;
+
+          if (condition.equals !== undefined) {
+            ref = ref.where(key, "==", condition.equals);
+          }
+          if (condition.gt !== undefined) {
+            ref = ref.where(key, ">", condition.gt);
+          }
+          if (condition.gte !== undefined) {
+            ref = ref.where(key, ">=", condition.gte);
+          }
+          if (condition.lt !== undefined) {
+            ref = ref.where(key, "<", condition.lt);
+          }
+          if (condition.lte !== undefined) {
+            ref = ref.where(key, "<=", condition.lte);
+          }
+        }
+      }
+
+      const snap = await ref.get();
+      if (snap.empty) return [];
+
+      const deletedDocs = snap.docs.map(
+        (d) => new this({ id: d.id, ...d.data() })
+      ) as InstanceType<T>[];
+
+      let batch = firestore.batch();
+      let count = 0;
+
+      for (const doc of snap.docs) {
+        batch.delete(doc.ref);
+        count++;
+
+        if (count % 500 === 0) {
+          await batch.commit();
+          batch = firestore.batch();
+        }
+      }
+
+      await batch.commit();
+
+      return deletedDocs;
     }
   };
 }
