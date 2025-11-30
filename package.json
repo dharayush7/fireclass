@@ -25,6 +25,9 @@
       "types": "./dist/decorators/index.d.ts"
     }
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "scripts": {
     "build": "tsup src/**/*.ts --format esm,cjs --dts"
