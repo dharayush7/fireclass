@@ -10,19 +10,19 @@
   },
   "exports": {
     "./core": {
+      "types": "./dist/core/index.d.ts",
       "import": "./dist/core/index.mjs",
-      "require": "./dist/core/index.js",
-      "types": "./dist/core/index.d.ts"
+      "require": "./dist/core/index.cjs"
     },
     "./types": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/types/index.mjs",
-      "require": "./dist/types/index.js",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/types/index.cjs"
     },
     "./decorators": {
+      "types": "./dist/decorators/index.d.ts",
       "import": "./dist/decorators/index.mjs",
-      "require": "./dist/decorators/index.js",
-      "types": "./dist/decorators/index.d.ts"
+      "require": "./dist/decorators/index.cjs"
     }
   },
   "files": [
