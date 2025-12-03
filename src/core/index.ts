@@ -3,6 +3,31 @@ import { QueryOptions } from "../types";
 import { validateOrReject } from "class-validator";
 import { plainToInstance } from "class-transformer";
 
+function convertFirestoreTypes(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertFirestoreTypes);
+  }
+
+  if (typeof obj === "object" && typeof (obj as any).toDate === "function") {
+    try {
+      return (obj as any).toDate();
+    } catch {
+      return obj;
+    }
+  }
+  if (Object.prototype.toString.call(obj) === "[object Object]") {
+    const out: Record<string, any> = {};
+    for (const k of Object.keys(obj)) {
+      out[k] = convertFirestoreTypes((obj as Record<string, any>)[k]);
+    }
+    return out;
+  }
+
+  return obj;
+}
+
 export function getBaseModel(firestore: Firestore) {
   return class BaseModel<T> {
     collection!: string;
@@ -65,7 +90,8 @@ export function getBaseModel(firestore: Firestore) {
       if (!doc.exists) return null;
 
       const data = doc.data() || {};
-      const instance = new this({ ...data, id }) as InstanceType<M>;
+      const convertedData = convertFirestoreTypes(data);
+      const instance = new this({ ...convertedData, id }) as InstanceType<M>;
       return instance;
     }
 
@@ -107,7 +133,7 @@ export function getBaseModel(firestore: Firestore) {
       const snap = await ref.get();
 
       return snap.docs.map(
-        (d) => new this({ id: d.id, ...d.data() })
+        (d) => new this({ id: d.id, ...convertFirestoreTypes(d.data()) })
       ) as InstanceType<T>[];
     }
 
