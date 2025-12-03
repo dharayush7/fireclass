@@ -1,12 +1,46 @@
 {
   "name": "@dharayush7/fireclass",
-  "version": "0.1.9",
+  "version": "0.2.11",
   "description": "A minimal, type-safe Firestore model helper** for Node.js with first-class integration** for class-validator and class-transformer.Provides base models, typed CRUD, declarative collection mapping, and strong query builders",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dharayush7/fireclass.git"
+  },
+  "homepage": "https://github.com/dharayush7/fireclass",
+  "bugs": {
+    "url": "https://github.com/dharayush7/fireclass/issues"
+  },
+  "keywords": [
+    "firestore",
+    "firebase",
+    "firebase-admin",
+    "class-validator",
+    "class-transformer",
+    "orm",
+    "model",
+    "typescript",
+    "type-safe",
+    "validation",
+    "decorator",
+    "crud",
+    "database",
+    "nosql",
+    "firestore-orm",
+    "firestore-model",
+    "query-builder",
+    "data-modeling",
+    "schema",
+    "entity",
+    "repository",
+    "nodejs",
+    "server-side"
+  ],
   "author": {
     "name": "Ayush Dhar",
     "email": "contact@ayushdhar.com",
-    "url": "https://github.com/dharayush07"
+    "url": "https://github.com/dharayush07",
+    "portfolio": "https://www.ayushdhar.com"
   },
   "type": "module",
   "main": "./dist/index.js",

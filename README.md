@@ -3,6 +3,10 @@
 A **minimal, type-safe Firestore model helper** for Node.js with **first-class integration** for `class-validator` and `class-transformer`.
 Provides base models, typed CRUD, declarative collection mapping, and strong query builders.
 
+**🔗 Links:**
+- **GitHub**: [https://github.com/dharayush7/fireclass](https://github.com/dharayush7/fireclass)
+- **Website**: [fireclass.ayushdhar.com](https://fireclass.ayushdhar.com)
+
 ---
 
 ## Installation
@@ -15,7 +19,11 @@ npm install @dharayush07/fireclass firebase-admin class-validator class-transfor
 yarn add @dharayush07/fireclass firebase-admin class-validator class-transformer
 ```
 
-> `firebase-admin` is required; `class-validator` and `class-transformer` are re-exported by Fireclass types for convenience.
+> **Important**: You must install `class-validator` and `class-transformer` as peer dependencies. These are required for validation and transformation decorators to work properly. `firebase-admin` is also required for Firestore operations.
+>
+> **Required Dependencies:**
+> - `class-validator` - For field validation decorators (e.g., `@IsString()`, `@IsDate()`, `@IsArray()`, etc.)
+> - `class-transformer` - For data transformation decorators (e.g., `@Type()`, `@Transform()`)
 
 ---
 
@@ -62,15 +70,20 @@ export const BaseModel = getBaseModel(firestore);
 
 ## Basic Usage
 
-Create a model mapped to a Firestore collection:
+Create a model mapped to a Firestore collection. **Every extended class must include a constructor** that calls `super(data)` and assigns the data:
 
 ```ts
 import { Collection } from "@dharayush07/fireclass/decorators";
-import { IsString, IsEmail, IsOptional, Length } from "class-validator";
+import { IsString, IsEmail, IsOptional, IsDate, IsArray, IsObject, IsBoolean, Length } from "class-validator";
 import { Transform, Type } from "class-transformer";
 
 @Collection("users")
 class User extends BaseModel<User> {
+  constructor(data?: Partial<User>) {
+    super(data);
+    Object.assign(this, data);
+  }
+
   @IsString()
   @Length(2, 50)
   name!: string;
@@ -79,13 +92,124 @@ class User extends BaseModel<User> {
   email!: string;
 
   @IsOptional()
+  @IsString()
   @Transform(({ value }) => value?.trim())
   displayName?: string;
 
+  @IsDate()
   @Type(() => Date)
-  createdAt: Date = new Date();
+  createdAt!: Date;
 }
 ```
+
+### Complete Example with All Field Types
+
+Here's a comprehensive example showing all field types with proper class-validator decorators:
+
+```ts
+import { Collection } from "@dharayush07/fireclass/decorators";
+import { 
+  IsString, 
+  IsEmail, 
+  IsDate, 
+  IsArray, 
+  IsObject, 
+  IsBoolean, 
+  IsOptional,
+  IsNumber 
+} from "class-validator";
+import { Type } from "class-transformer";
+
+interface TurfSlot {
+  startTime: string;
+  endTime: string;
+}
+
+@Collection("turfBookings")
+export class TurfBooking extends BaseModel<TurfBooking> {
+  constructor(data?: Partial<TurfBooking>) {
+    super(data);
+    Object.assign(this, data);
+  }
+
+  @IsDate()
+  @Type(() => Date)
+  bookingDate!: Date;
+
+  @IsDate()
+  @Type(() => Date)
+  createdAt!: Date;
+
+  @IsString()
+  name!: string;
+
+  @IsString()
+  email!: string;
+
+  @IsString()
+  phoneNumber!: string;
+
+  @IsArray()
+  paymentId!: string[];
+
+  @IsObject()
+  prizeBreakThrough!: {
+    amountPaid: number;
+    totalAmount: number;
+    amountPending: number;
+    amountToBePaid: number;
+    totalDiscount: number;
+  };
+
+  @IsBoolean()
+  status!: boolean;
+
+  @IsString()
+  uid!: string;
+
+  @IsArray()
+  slots!: (TurfSlot & { id: string })[];
+
+  @IsOptional()
+  @IsBoolean()
+  isPartially?: boolean;
+}
+```
+
+### Optional Fields
+
+Optional fields should be marked with the `@IsOptional()` decorator from `class-validator`. This allows the field to be `undefined` or omitted during validation:
+
+```ts
+@Collection("products")
+class Product extends BaseModel<Product> {
+  constructor(data?: Partial<Product>) {
+    super(data);
+    Object.assign(this, data);
+  }
+
+  @IsString()
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string; // Optional field
+
+  @IsOptional()
+  @IsNumber()
+  discount?: number; // Optional field
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean; // Optional field
+}
+```
+
+**Key Points for Optional Fields:**
+- Use `?` in TypeScript to mark the property as optional
+- Always include `@IsOptional()` decorator before other validation decorators
+- Optional fields can be `undefined` or omitted when creating instances
+- If provided, optional fields will still be validated according to their type decorators
 
 ---
 
@@ -151,20 +275,31 @@ try {
 - Normalize and coerce data before validation / save.
 
 ```ts
+import { IsString, IsNumber } from "class-validator";
+
 class Address {
+  @IsString()
   @Transform(({ value }) => value?.trim())
   street!: string;
 
+  @IsString()
   city!: string;
 }
 
 @Collection("profiles")
 class Profile extends BaseModel<Profile> {
+  constructor(data?: Partial<Profile>) {
+    super(data);
+    Object.assign(this, data);
+  }
+
+  @IsObject()
   @Type(() => Address)
   address!: Address;
 
+  @IsNumber()
   @Transform(({ value }) => Number(value))
-  reputation: number = 0;
+  reputation!: number;
 }
 ```
 
@@ -231,6 +366,11 @@ const BaseModel = getBaseModel(firestore);
 
 @Collection("posts")
 class Post extends BaseModel<Post> {
+  constructor(data?: Partial<Post>) {
+    super(data);
+    Object.assign(this, data);
+  }
+
   @IsString()
   title!: string;
 }
@@ -268,6 +408,11 @@ const BaseModel = getBaseModel(firestore);
 
 @Collection("subscribers")
 class Subscriber extends BaseModel<Subscriber> {
+  constructor(data?: Partial<Subscriber>) {
+    super(data);
+    Object.assign(this, data);
+  }
+
   @IsEmail()
   email!: string;
 }
@@ -291,6 +436,20 @@ export const subscribe = functions.https.onRequest(async (req, res) => {
 - `delete()` throws if `id` is missing.
 - `findById()` returns `null` if not found.
 - `findMany()` supports `where`, `orderBy`, `limit` with proper type safety.
+
+---
+
+---
+
+## Contact & Support
+
+**Developed by:** Ayush Dhar
+
+- **GitHub**: [https://github.com/dharayush7/fireclass](https://github.com/dharayush7/fireclass)
+- **Website**: [fireclass.ayushdhar.com](https://fireclass.ayushdhar.com)
+- **Portfolio**: [ayushdhar.com](https://www.ayushdhar.com)
+- **Email**: contact@ayushdhar.com
+- **GitHub Profile**: [@dharayush07](https://github.com/dharayush07)
 
 ---
 

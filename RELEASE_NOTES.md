@@ -1,23 +1,37 @@
 # Release Notes
 
-## v0.1.9 (2025-11-30)
+## v0.2.11 (2025-12-03)
 
 ### Summary
 
-- Adds comprehensive documentation and examples to onboard users quickly.
-- Confirms stable API for `getBaseModel`, `@Collection` decorator, and typed queries.
+- Enhanced documentation with comprehensive examples showing proper class-validator decorator usage for all field types.
+- Added required constructor pattern documentation for all extended classes.
+- Improved developer experience with optional fields documentation and contact information.
 
-### What’s New
+### What's New
 
-- `README.md` with detailed integration for `class-validator` and `class-transformer`.
-- API reference for `BaseModel` methods and `QueryOptions<T>`.
-- Practical examples (Express, Cloud Functions) and error handling strategies.
+- **Complete Field Type Examples**: Added comprehensive `TurfBooking` example demonstrating proper usage of:
+  - `@IsDate()` for Date fields
+  - `@IsString()` for string fields
+  - `@IsArray()` for array fields
+  - `@IsObject()` for object fields
+  - `@IsBoolean()` for boolean fields
+  - `@IsOptional()` for optional fields
+- **Constructor Pattern Documentation**: All examples now clearly show the required constructor pattern:
+  ```typescript
+  constructor(data?: Partial<ClassName>) {
+    super(data);
+    Object.assign(this, data);
+  }
+  ```
+- **Optional Fields Guide**: New section explaining how to properly mark and validate optional fields with `@IsOptional()` decorator.
+- **Contact & Support Section**: Added developer contact information including portfolio, GitHub, and email.
 
 ### Improvements
 
-- Clear validation flow using `validateOrReject` prior to writes.
-- Transformation pipeline with `plainToInstance`, `@Transform`, and `@Type`.
-- Guidance for queries with `where`, `orderBy`, `limit`, and index considerations.
+- **Enhanced Code Examples**: All code examples throughout the documentation now follow consistent patterns with proper decorators.
+- **Dependency Documentation**: Clarified requirements for `class-validator` and `class-transformer` with detailed explanations.
+- **Better Developer Onboarding**: Improved documentation structure makes it easier for new users to understand proper usage patterns.
 
 ### Breaking Changes
 
@@ -25,12 +39,19 @@
 
 ### Upgrade Notes
 
-- No code changes required. Install the package and follow the `README.md` for usage.
-- Ensure peer libraries align:
-  - `firebase-admin@^13.6.0`
-  - `class-validator@^0.14.3`
-  - `class-transformer@^0.5.1`
+- No code changes required. This is a documentation-only release.
+- Ensure you're using the required constructor pattern in all your extended classes:
+  ```typescript
+  constructor(data?: Partial<YourClass>) {
+    super(data);
+    Object.assign(this, data);
+  }
+  ```
+- Make sure all fields have appropriate `class-validator` decorators based on their types.
+- For optional fields, always use `@IsOptional()` before other validation decorators.
 
 ### Known Issues
 
 - Complex `where + orderBy` combos may require Firestore composite indexes.
+
+---
